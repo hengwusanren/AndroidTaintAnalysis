@@ -1,0 +1,40 @@
+# java执行shell命令：
+#  http://blog.csdn.net/arkblue/article/details/7897396
+#  http://blog.csdn.net/y13872888163/article/details/6530430
+#  http://www.trinea.cn/android/android-java-execute-shell-commands/
+# shell命令javac、java编译运行java：
+#  http://e066202152006.blog.163.com/blog/static/22912848201171111270853/
+# java对象和json互转换：
+#  http://iteye.blog.163.com/blog/static/1863080962012102124833914/
+#  http://www.oschina.net/code/snippet_566353_10898
+#  http://topcss.iteye.com/blog/1069680
+
+
+1. 用androdd.py，输入.apk文件，输出一个.dot文件目录；
+	> python androdd.py -i ../input/test.apk -o ../output/test_androdd -d
+
+2. 用apktool，输入.apk文件，输出一个文件目录；
+	> apktool d ../input/test.apk ../output/test_apktool
+
+3. 运行主程序，从.dot文件提取代码块信息，进而修改.smali文件；
+
+4. 将类对象保存为cb2varop.json文件；
+	{"cbs":[{"id":"MainActivity->onClick-BB@0x0","varops":[{"id":"MainActivity->s Ljava/lang/String","op":"w"},{},...{}]},{},...,{}]}
+
+5. 将修改后的文件重新打包成.apk文件；
+	> apktool b ../output/test_apktool ../output/unsignedtest.apk
+
+6. 为新的.apk文件签名；
+	i.  keytool和jarsigner命令；见参考[1]和[2]
+	ii. > java -jar signapk.jar platform.x509.pem platform.pk8 unsignedtest.apk signedtest.apk
+
+7. 安装并运行.apk文件，触发事件，控制台获取log输出信息，得到事件到代码块的map，写入event2cb.json文件；
+	> adb install signedtest.apk
+	{"events":[{"id":"event0","cbs":[{"id":"Lcom/example/edgexample/MainActivity;->onClick-BB@0x0"},{},...{}]},{},...,{}]}
+
+8. 将两个json结合成event2varop.json；
+
+
+参考：
+[1] http://hi.baidu.com/qmiao128/item/efb6097e5ea3985c0d0a0708
+[2] http://developer.android.com/tools/publishing/app-signing.html
