@@ -17,12 +17,16 @@ public class ClassData {
 	private VarsInitData vars;//类中声明的所有变量
 	private ArrayList<MethodData> methods;//类中实现的所有方法
 	private ArrayList<String> methodNames;
+	private boolean debug = false;
 	
 	public ClassData(String filePath){
 		File dir = new File(filePath);
 		dirPath = filePath;
 		try {
-			classID = dir.getCanonicalPath().substring(dir.getCanonicalPath().lastIndexOf("output/dot/") + 11);//getName();////////////////////////////////////////20140619
+			String dirStr = dir.getCanonicalPath();
+			int pos0 = dirStr.lastIndexOf("output/dot/") + 11;
+			pos0 = dirStr.indexOf('/', pos0) + 1;
+			classID = dirStr.substring(pos0);//getName();////////////////////////////////////////20140619
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

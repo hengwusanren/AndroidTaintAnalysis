@@ -17,6 +17,7 @@ public class VarOpItem {
 	private String operation;
 	private int type = -1;//0代表read，1代表write，2代表调用（method），-1表示不是变量操作
 	private static String[] operationTypes = {"r", "w", "invoked"};
+	private boolean debug = false;
 	
 	//需不需要把varNameList也传参传进来呢？
 	public VarOpItem(StringBuffer cmdStr, String className, HashMap<String, String> varList, ArrayList<String> methodList){
@@ -24,8 +25,8 @@ public class VarOpItem {
 		
 		//if(cmdStr.indexOf("/" + className + ";->") < 0){
 		if(cmdStr.indexOf(className + ";->") < 0){
-			System.out.println("fuck classname: " + className);//<--
-			System.out.println("fuck cmdstr: " + cmdStr);//<--
+			if(debug) System.out.println("fuck classname: " + className);//<--
+			if(debug) System.out.println("fuck cmdstr: " + cmdStr);//<--
 			
 			varStr = "unknown";
 			varType = "unknown";
@@ -57,7 +58,7 @@ public class VarOpItem {
 			int bpos_vs = cmdStr.indexOf(";->") + 3;
 			int epos_vs_0 = cmdStr.indexOf("(", bpos_vs);
 			int epos_vs_1 = cmdStr.indexOf(")", bpos_vs) + 1;
-			System.out.println("[log] a cmdStr is: " + cmdStr);
+			if(debug) System.out.println("[log] a cmdStr is: " + cmdStr);
 			//if(methodList.contains(cmdStr.substring(bpos_vs, epos_vs_0)))
 			if(false){
 				varStr = cmdStr.substring(bpos_vs, epos_vs_1);//

@@ -12,6 +12,7 @@ public class VarsInitData {
 	private String classStr;
 	private HashMap<String, String> vars;
 	private OneCodeblock initblock;
+	private boolean debug = false;
 	
 	public VarsInitData(String filePath){
 		File dir = new File(filePath);
@@ -37,11 +38,11 @@ public class VarsInitData {
                 read.close();
 	        }
             else{
-	            System.out.println("no such a file: " + f.getAbsolutePath());
+            	if(debug) System.out.println("no such a file: " + f.getAbsolutePath());
 	        }
         }
         catch(Exception e){
-            System.out.println("failed to read: " + f.getAbsolutePath());
+        	if(debug) System.out.println("failed to read: " + f.getAbsolutePath());
             e.printStackTrace();
         }
 		
@@ -53,7 +54,7 @@ public class VarsInitData {
 			String varType = varGot.substring(0, space);
 			String varName = varGot.substring(space + 1);
 			vars.put(varName, varType);
-			System.out.println("[log] a new var: (" + varType + ")" + varName);
+			if(debug) System.out.println("[log] a new var: (" + varType + ")" + varName);
 		}
 	}
 	

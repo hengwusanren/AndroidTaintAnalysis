@@ -24,7 +24,7 @@ public class Classes2Json {
 		
 		try {
 			FileWriter writer = new FileWriter(fileName, false);
-			System.out.println(r.toString());
+			//System.out.println(r.toString());
 			writer.write(r.toString());
 			
 			writer.close();

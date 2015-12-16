@@ -16,23 +16,30 @@ import json.Classes2Json;
 
 public class Main {
 	
-	public final static String dotRootPath = "input/dot/";
-	public final static String dotOutputPath = "output/dot/";
-	public final static String smaliRootPath = "input/smali/";
-	public final static String smaliOutputPath = "output/smali/";
-	//public final static String jsonOutputName = "output/classes.json";
-	public final static String jsonOutputName = "../shareIO/classes.json";
+	public static String dotRootPath;
+	public static String dotOutputPath;
+	public static String smaliRootPath;
+	public static String smaliOutputPath;
+	public static String jsonOutputName;
     private static ArrayList<String> classes = new ArrayList<String>();
     private static ArrayList<dot.data.ClassData> classesData = new ArrayList<dot.data.ClassData>();
+	public static boolean debuggable = true;
     
     public static void main(String[] args) throws Exception {
+    	String appName = args[0];
+    	dotRootPath = "input/dot/" + appName + "/";
+    	dotOutputPath = "output/dot/" + appName + "/";
+    	smaliRootPath = "input/smali/" + appName + "/";
+    	smaliOutputPath = "output/smali/" + appName + "/";
+    	jsonOutputName = "../shareIO/" + appName + ".json";
+    	
     	VarOpItem.initHashMap();
 
         System.out.println("[log] getLeafPaths(" + dotRootPath + ");");
         clearDir(dotOutputPath);//
         copyDir(dotRootPath, dotOutputPath);
         long t = System.currentTimeMillis();
-        getLeafPaths(dotOutputPath, 0);
+        getLeafPaths(dotOutputPath, 0, debuggable);
         System.out.println(System.currentTimeMillis() - t);
         System.out.println("[log] classes obtained from dots!");
         
@@ -41,11 +48,12 @@ public class Main {
         copyDir(smaliRootPath, smaliOutputPath);
         t = System.currentTimeMillis();
         File[] debagFilesUnderRoot = new File(smaliOutputPath).listFiles();
-        if(debagFilesUnderRoot.length == 0 || !debagFilesUnderRoot[0].isDirectory()) {
+        if(debagFilesUnderRoot.length == 0) {// || !debagFilesUnderRoot[0].isDirectory()) {
         	System.out.println("fail to find smali generated just now!");
         	return;
         }
-        getLeafPaths(debagFilesUnderRoot[0].getAbsolutePath() + "/smali/com/", 1);//<--
+        //getLeafPaths(debagFilesUnderRoot[0].getAbsolutePath() + "/smali/" + (args.length > 1 ? parseRelativePath(args[1]) : "com/"), 1);//<-- 要插桩的子目录
+        getLeafPaths(new File(smaliOutputPath).getAbsolutePath() + "/smali/" + (args.length > 1 ? parseRelativePath(args[1]) : "com/"), 1, debuggable);//<-- 要插桩的子目录
         System.out.println(System.currentTimeMillis() - t);
         System.out.println("[log] classes modified in smalis!");
         
@@ -53,7 +61,13 @@ public class Main {
         System.out.println("[log] classes transformed into json!");
     }
     
-    public static void getLeafPaths(String strPath, int choice) {
+    public static String parseRelativePath(String p) {
+    	String r = p + ((p.length() == 0 || (p.length() > 0 && p.charAt(p.length() - 1) != '/')) ? "/" : "");
+    	if(r.charAt(0) == '/') return r.substring(1);
+    	return r;
+    }
+    
+    public static void getLeafPaths(String strPath, int choice, boolean debug) {
         File dir = new File(strPath);
         File[] files = dir.listFiles();
         if (files == null)
@@ -62,7 +76,7 @@ public class Main {
         //cunzai wenti! Jiyou wenjian youyou wenjianjia shi, wenjian huibei hulue!
         if(dirIsleafPath(files)){
         	if(choice == 0){
-            	System.out.println("[log] new dotClassData(" + strPath + ");");
+            	if(debug) System.out.println("[log] new dotClassData(" + strPath + ");");
             	dot.data.ClassData classdt = new ClassData(strPath);//视为leafPath，生成该类下的所有数据
             	classes.add(classdt.getID());
             	classesData.add(classdt);//a class of dot
@@ -72,7 +86,7 @@ public class Main {
         		//System.out.println(clses.length);
         		for(File sml : files){
         			if(sml.getName().indexOf(".smali") < 0) continue;
-	            	System.out.println("[log] new smaliClassData(" + sml.getAbsolutePath() + ");");
+        			if(debug) System.out.println("[log] new smaliClassData(" + sml.getAbsolutePath() + ");");
 	            	try {
 						smali.data.ClassData classdt = new smali.data.ClassData(sml.getAbsolutePath(), dot.data.ClassData.getClassDataByID(clses, 
 								sml.getCanonicalPath().substring(sml.getCanonicalPath().lastIndexOf("smali/") + 6, sml.getCanonicalPath().indexOf(".smali"))));
@@ -90,8 +104,8 @@ public class Main {
         
         for (File f : files) {
             if (f.isDirectory()) {
-            	System.out.println("[log] getLeafPaths(" + f.getAbsolutePath() + ");");
-            	getLeafPaths(f.getAbsolutePath(), choice);
+            	if(debug) System.out.println("[log] getLeafPaths(" + f.getAbsolutePath() + ");");
+            	getLeafPaths(f.getAbsolutePath(), choice, debug);
             }
         }
     }

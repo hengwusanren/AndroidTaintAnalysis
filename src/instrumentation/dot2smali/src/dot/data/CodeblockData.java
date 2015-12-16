@@ -14,17 +14,18 @@ public class CodeblockData {
 	private String codeblockID;
 	private ArrayList<OneEdge> edges;
 	private OneCodeblock context;
+	private boolean debug = false;
 	
 	public CodeblockData(ArrayList<String> codeblockLines, String className, String methodName, HashMap<String, String> varList, ArrayList<String> methodList){
 		edges = new ArrayList<OneEdge>();
 		for(String lineTxt : codeblockLines){
 			if(OneEdge.aLineIsOneEdge(lineTxt)){
 				OneEdge e = new OneEdge(lineTxt);
-				System.out.println("[log] new OneEdge: " + e.toString());
+				if(debug) System.out.println("[log] new OneEdge: " + e.toString());
 				edges.add(e);
 			}
 			else{
-				System.out.println("[log] new OneCBContext: " + lineTxt);
+				if(debug) System.out.println("[log] new OneCBContext: " + lineTxt);
 				context = new OneCodeblock(lineTxt, className, methodName, varList, methodList);//一个代码块可以有几条边，但反正只会有一行是真正的代码内容
 				//System.out.println("fuck: ");
 			}
@@ -71,7 +72,7 @@ public class CodeblockData {
 	public String toString(){
 		StringBuffer r = new StringBuffer("");
 		for(OneEdge e : edges){
-			System.out.println(e.toString());
+			if(debug) System.out.println(e.toString());
 			r.append(e.toString() + "\n");
 		}
 		r.append(context.toString() + "\n");

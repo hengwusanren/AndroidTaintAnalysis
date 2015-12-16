@@ -18,15 +18,16 @@ public class ClassData {
 	private String dirPath;
 	private String[] vars;
 	private String[] methods;
+	private boolean debug = false;
 	
 	public ClassData(String fileName, dot.data.ClassData classdt){
 		if(classdt == null){
-			System.out.println("[LOG] no classdata found!");
+			if(debug) System.out.println("[LOG] no classdata found!");
 			return;
 		}
 		
 		classID = classdt.getID();
-		System.out.println("classID: " + classID);
+		if(debug) System.out.println("classID: " + classID);
 		inputSmaliPath = fileName;
 		vars = classdt.getVarNames();
 		methods = classdt.getMethodNames();
@@ -83,11 +84,11 @@ public class ClassData {
                 	
                 	//.method
                 	if(lineStr.indexOf(".method ") == 0){
-                		System.out.print("\n.method ");
+                		if(debug) System.out.print("\n.method ");
                 		String methodnm = containMethod(lineStr, classdt.getMethodNames());
-                		System.out.println("methodnm: " + methodnm);
+                		if(debug) System.out.println("methodnm: " + methodnm);
                 		if(!methodnm.equals("")){
-                			System.out.print(methodnm + "\n");
+                			if(debug) System.out.print(methodnm + "\n");
                 			curMethoddt = classdt.getMethodDataByName(methodnm);
                 			codeblockIndex = 0;
                 			codeblockLineIndex = 0;
@@ -125,7 +126,7 @@ public class ClassData {
                 	if(writeState == 1 && registerTooMany == 0 && !lineStr.equals("") && (curMethoddt.getCodeblocks()[codeblockIndex].getCommands()[codeblockLineIndex].indexOf(
                 			lineStr) >= 0 || (lineStr.indexOf(" ") >= 0 && curMethoddt.getCodeblocks()[codeblockIndex].getCommands()[codeblockLineIndex].indexOf(
                 			lineStr.substring(1, lineStr.indexOf(" ") + 1)) >= 0))){
-                		System.out.println(curMethoddt.getCodeblocks()[codeblockIndex].getID());
+                		if(debug) System.out.println(curMethoddt.getCodeblocks()[codeblockIndex].getID());
                 		//codeblockLines.add(line);
                 		codeblockLineIndex++;
                 		if(codeblockLineIndex == 1){// onCreate不需要log输出代码块信息！
@@ -163,11 +164,11 @@ public class ClassData {
                 fr.renameTo(new File(inputSmaliPath));
 	        }
             else{
-	            System.out.println("No such a file: " + inputSmaliPath);
+            	if(debug) System.out.println("No such a file: " + inputSmaliPath);
 	        }
         }
         catch(IOException e){
-            System.out.println("Failed to read or write.");
+        	if(debug) System.out.println("Failed to read or write.");
             e.printStackTrace();
         }
 	}
@@ -177,7 +178,7 @@ public class ClassData {
 			//System.out.println(s);
 			if((classID + "->" + smlLine.substring(smlLine.lastIndexOf(" ") + 1).replace('(', '-').replace(')', '-').replace('/', '_').replaceAll(";", "")).
 					indexOf(s) == 0) {
-				System.out.println(s);
+				if(debug) System.out.println(s);
 				return s;
 			}
 		}

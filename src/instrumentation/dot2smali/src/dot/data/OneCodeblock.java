@@ -10,6 +10,7 @@ public class OneCodeblock {
 	private String label;
 	private ArrayList<StringBuffer> cmds;
 	private ArrayList<VarOpItem> varOperations;
+	private boolean debug = false;
 	
 	public OneCodeblock(String lineStr, String className, String methodName, HashMap<String, String> varList, ArrayList<String> methodList){
 		//int bpos_ID = lineStr.indexOf("\"") + 1;

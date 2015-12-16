@@ -10,6 +10,7 @@ public class MethodData {
 	private String className;
 	private String methodID;
 	private ArrayList<CodeblockData> codeblocks;
+	private boolean debug = false;
 	
 	public MethodData(){}
 	
@@ -49,9 +50,9 @@ public class MethodData {
                 while((lineTxt = bufferedReader.readLine()) != null){
                     codeblockLines.add(lineTxt);
                 	if(lineTxt.indexOf("\", label=\"") > 0){
-                		System.out.println("[log] lineTxt: " + lineTxt);
+                		if(debug) System.out.println("[log] lineTxt: " + lineTxt);
                 		CodeblockData cbdata = new CodeblockData(codeblockLines, className, methodID, varList, methodList);
-                		System.out.println("[log] edgeCount: " + cbdata.getEdgesCount());
+                		if(debug) System.out.println("[log] edgeCount: " + cbdata.getEdgesCount());
                     	codeblocks.add(cbdata);
                     	codeblockLines.clear();
                     }
@@ -59,11 +60,11 @@ public class MethodData {
                 read.close();
 	        }
             else{
-	            System.out.println("no such a file: " + fileName);
+            	if(debug) System.out.println("no such a file: " + fileName);
 	        }
         }
         catch(Exception e){
-            System.out.println("failed to read: " + fileName);
+        	if(debug) System.out.println("failed to read: " + fileName);
             e.printStackTrace();
         }
     }
@@ -107,11 +108,11 @@ public class MethodData {
 		String newDotName = dotFilePath.substring(0, dotFilePath.indexOf(".dot")) + "[new].dot";
 		try {
 			FileWriter writer = new FileWriter(newDotName, true);
-			System.out.println(codeblocks.size());
+			if(debug) System.out.println(codeblocks.size());
 			//将codeblocks中所有codeblock写入文件中
 			for(CodeblockData cbdata : codeblocks){
 				//cbdata.outPut(writer);
-				System.out.println(cbdata.getEdgesCount());
+				if(debug) System.out.println(cbdata.getEdgesCount());
 				writer.write(cbdata.toString());
 			}
 			writer.close();
