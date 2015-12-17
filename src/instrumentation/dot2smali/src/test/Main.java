@@ -23,7 +23,7 @@ public class Main {
 	public static String jsonOutputName;
     private static ArrayList<String> classes = new ArrayList<String>();
     private static ArrayList<dot.data.ClassData> classesData = new ArrayList<dot.data.ClassData>();
-	public static boolean debuggable = true;
+	public static boolean debuggable = false;
     
     public static void main(String[] args) throws Exception {
     	String appName = args[0];
@@ -62,13 +62,28 @@ public class Main {
     }
     
     public static String parseRelativePath(String p) {
-    	String r = p + ((p.length() == 0 || (p.length() > 0 && p.charAt(p.length() - 1) != '/')) ? "/" : "");
+    	String r = p + ((p.length() == 0 || (p.length() > 0 && p.charAt(p.length() - 1) != '/' && !p.endsWith(".smali"))) ? "/" : "");
     	if(r.charAt(0) == '/') return r.substring(1);
     	return r;
     }
     
     public static void getLeafPaths(String strPath, int choice, boolean debug) {
         File dir = new File(strPath);
+        if(dir.isFile()) {
+        	dot.data.ClassData[] clses = classesData.toArray(new dot.data.ClassData[0]);
+    		
+			if(dir.getName().indexOf(".smali") < 0) return;
+			if(debug) System.out.println("[log] new smaliClassData(" + dir.getAbsolutePath() + ");");
+        	try {
+				smali.data.ClassData classdt = new smali.data.ClassData(dir.getAbsolutePath(), dot.data.ClassData.getClassDataByID(clses, 
+						dir.getCanonicalPath().substring(dir.getCanonicalPath().lastIndexOf("smali/") + 6, dir.getCanonicalPath().indexOf(".smali"))));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+            	
+    		return;
+        }
         File[] files = dir.listFiles();
         if (files == null)
             return;

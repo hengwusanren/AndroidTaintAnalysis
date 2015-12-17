@@ -51,7 +51,8 @@ public class VarOpItem {
 				//System.out.println("fuck cmdword: " + cmdWord);//<--
 				type = -1;
 			}
-			varType = varList.get(varStr);//暂时不验证该var是否真的是该type
+			else
+				varType = varList.get(varStr);//暂时不验证该var是否真的是该type
 			return;
 		}
 		if(cmdWord.indexOf("invoke-") >= 0){

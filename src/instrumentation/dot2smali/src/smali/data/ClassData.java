@@ -54,7 +54,8 @@ public class ClassData {
 	    		int codeblockIndex = 0;
 	    		int codeblockLineIndex = 0;
 	    		int writeState = 0;//1表示正常在method体内
-	    		int dotLocals = 0;//how many parameter registers the current method will use. Important!
+	    		int dotParas = 0;//how many parameters the current method has. Important!
+	    		int dotLocals = 0;//how many non-parameter registers the current method will use. Important!
 	    		int registerTooMany = 0;//if the number of registers is larger than 16
 	    		ArrayList<String> codeblockLines = new ArrayList<String>();
 	    		
@@ -86,8 +87,9 @@ public class ClassData {
                 	if(lineStr.indexOf(".method ") == 0){
                 		if(debug) System.out.print("\n.method ");
                 		String methodnm = containMethod(lineStr, classdt.getMethodNames());
-                		if(debug) System.out.println("methodnm: " + methodnm);
+                		if(debug) System.out.println("methodnm: ");
                 		if(!methodnm.equals("")){
+                			dotParas = countMethodParas(lineStr); // parse the number of parameters this method requires
                 			if(debug) System.out.print(methodnm + "\n");
                 			curMethoddt = classdt.getMethodDataByName(methodnm);
                 			codeblockIndex = 0;
@@ -110,7 +112,7 @@ public class ClassData {
                 	//.registers
                 	if(lineStr.indexOf(".locals ") == 0 && writeState == 1){
             			dotLocals = Integer.parseInt(lineStr.substring(8)) + 2;
-            			if(dotLocals > 8){
+            			if(dotLocals + dotParas >= 16){ // sometimes "this" is an implicit parameter
             				registerTooMany = 1;
             				writer.write(line + "\n");
             			}
@@ -123,9 +125,15 @@ public class ClassData {
                 	
                 	//现在的比对算法还存在很大问题！不够鲁棒，默认为代码块的指令谓词完全相等
                 	//在method体内，且该行开头的指令与当前代码块的当前行指令相同
-                	if(writeState == 1 && registerTooMany == 0 && !lineStr.equals("") && (curMethoddt.getCodeblocks()[codeblockIndex].getCommands()[codeblockLineIndex].indexOf(
-                			lineStr) >= 0 || (lineStr.indexOf(" ") >= 0 && curMethoddt.getCodeblocks()[codeblockIndex].getCommands()[codeblockLineIndex].indexOf(
-                			lineStr.substring(1, lineStr.indexOf(" ") + 1)) >= 0))){
+                	if(writeState == 1 
+                			&& registerTooMany == 0 
+                			&& !lineStr.equals("") 
+                			&& (curMethoddt.getCodeblocks()[codeblockIndex].getCommands()[codeblockLineIndex].indexOf(lineStr) >= 0 
+                				|| (lineStr.indexOf(" ") >= 0 
+                					&& curMethoddt.getCodeblocks()[codeblockIndex].getCommands()[codeblockLineIndex].indexOf(lineStr.substring(1, lineStr.indexOf(" ") + 1)) >= 0
+                					)
+                				)
+                			){
                 		if(debug) System.out.println(curMethoddt.getCodeblocks()[codeblockIndex].getID());
                 		//codeblockLines.add(line);
                 		codeblockLineIndex++;
@@ -171,6 +179,38 @@ public class ClassData {
         	if(debug) System.out.println("Failed to read or write.");
             e.printStackTrace();
         }
+	}
+	
+	private int countMethodParas(String smlLine){
+		// todo: count parameters of a method given its smali-style declaration
+		
+		// get string in "()"
+		int pos0 = smlLine.indexOf('(');
+		if(pos0 < 0) return 0;
+		int pos1 = smlLine.indexOf(')', pos0);
+		if(pos1 < 0) return 0;
+		String paras = smlLine.substring(pos0 + 1, pos1);
+		
+		return countTypesFromString(paras);
+	}
+	
+	private static int countTypesFromString(String s){
+		// a type is like "Z", "B", "S", "C", "I", "J", "F", "D", "L...;", "[...".
+        if(s.length() == 0) return 0;
+        char head = s.charAt(0);
+
+        if(head == '[') return countTypesFromString(s.substring(1));
+
+        String basicTypes = "ZBSCIJFD";
+        if(basicTypes.indexOf(head) >= 0) return 1 + countTypesFromString(s.substring(1));
+
+        if(head == 'L') {
+            int pos = s.indexOf(';');
+            if(pos < 0) return 0;
+            return 1 + countTypesFromString(s.substring(pos + 1));
+        }
+
+        return 1;
 	}
 	
 	private String containMethod(String smlLine, String[] methods){

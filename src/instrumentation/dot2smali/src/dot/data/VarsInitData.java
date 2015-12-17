@@ -17,6 +17,7 @@ public class VarsInitData {
 	public VarsInitData(String filePath){
 		File dir = new File(filePath);
 		classStr = dir.getName();
+		//System.out.println("classStr: " + classStr);
 		File[] files = dir.listFiles();
 		for(File f : files){
 			if(f.getName().indexOf("<init>") >= 0 && f.getName().indexOf(".dot") >= 0 && f.getName().indexOf("[new]") < 0){
@@ -28,6 +29,7 @@ public class VarsInitData {
 	
 	private void parseVars(File f){
 		vars = new HashMap<String, String>();
+		//System.out.println("parseVars: " + f.getAbsolutePath());
 		try {
             String encoding = "UTF-8";
             if(f.isFile() && f.exists()){
@@ -42,7 +44,7 @@ public class VarsInitData {
 	        }
         }
         catch(Exception e){
-        	if(debug) System.out.println("failed to read: " + f.getAbsolutePath());
+        	//System.out.println("failed to read: " + f.getAbsolutePath());
             e.printStackTrace();
         }
 		

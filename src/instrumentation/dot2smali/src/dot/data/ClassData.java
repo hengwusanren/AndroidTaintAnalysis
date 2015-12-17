@@ -31,9 +31,9 @@ public class ClassData {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		vars = new VarsInitData(filePath);
+		vars = new VarsInitData(filePath);//
 		setMethodNames(dir.listFiles());
-		System.out.println("[log] setMethodNames(" + methodNames.toString() + ");");
+		if(debug) System.out.println("[log] setMethodNames(" + methodNames.toString() + ");");
 		findMethods(dir.listFiles(), methodNames);
 	}
 	
@@ -48,7 +48,7 @@ public class ClassData {
 			if(f.getName().indexOf("<init>") >= 0 || f.getName().indexOf(".dot") < 0 || f.getName().indexOf("[new]") > 0){
 				continue;
 			}
-			System.out.println("[log] new MethodData(" + f.getAbsolutePath() + ");");
+			if(debug) System.out.println("[log] new MethodData(" + f.getAbsolutePath() + ");");
 			methods.add(new MethodData(classID, f.getAbsolutePath(), vars.getVars(), methodList));
 		}
 	}
