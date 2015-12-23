@@ -10,6 +10,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import manifest.PermissionData;
+
 import dot.data.ClassData;
 import dot.data.VarOpItem;
 import json.Classes2Json;
@@ -21,6 +23,7 @@ public class Main {
 	public static String smaliRootPath;
 	public static String smaliOutputPath;
 	public static String jsonOutputName;
+	public static String manifestFilePath;
     private static ArrayList<String> classes = new ArrayList<String>();
     private static ArrayList<dot.data.ClassData> classesData = new ArrayList<dot.data.ClassData>();
 	public static boolean debuggable = false;
@@ -32,6 +35,7 @@ public class Main {
     	smaliRootPath = "input/smali/" + appName + "/";
     	smaliOutputPath = "output/smali/" + appName + "/";
     	jsonOutputName = "../shareIO/" + appName + ".json";
+    	manifestFilePath = smaliOutputPath + "AndroidManifest.xml";
     	
     	VarOpItem.initHashMap();
 
@@ -59,6 +63,9 @@ public class Main {
         
         Classes2Json cjson = new Classes2Json(jsonOutputName, classesData);
         System.out.println("[log] classes transformed into json!");
+        
+        PermissionData addPermission = new PermissionData(manifestFilePath, "WRITE_EXTERNAL_STORAGE");
+        System.out.println("[log] permission \"WRITE_EXTERNAL_STORAGE\" added into AndroidManifest.xml!");
     }
     
     public static String parseRelativePath(String p) {
