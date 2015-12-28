@@ -19,6 +19,7 @@ public class ClassData {
 	private String[] vars;
 	private String[] methods;
 	private boolean debug = false;
+	private int logDegree = 1; // 0: log every code-block; 1: log every method
 	
 	public ClassData(String fileName, dot.data.ClassData classdt){
 		if(classdt == null){
@@ -54,6 +55,7 @@ public class ClassData {
 	    		int codeblockIndex = 0;
 	    		int codeblockLineIndex = 0;
 	    		int writeState = 0;//1表示正常在method体内
+	    		boolean methodLogged = false;
 	    		int dotParas = 0;//how many parameters the current method has. Important!
 	    		int dotLocals = 0;//how many non-parameter registers the current method will use. Important!
 	    		int registerTooMany = 0;//if the number of registers is larger than 16
@@ -104,6 +106,7 @@ public class ClassData {
                 	//.end method
                 	if(lineStr.equals(".end method")){
                 		writeState = 0;
+                		methodLogged = false;
                 		registerTooMany = 0;
                 		writer.write(line + "\n");
                 		continue;
@@ -138,7 +141,9 @@ public class ClassData {
                 		//codeblockLines.add(line);
                 		codeblockLineIndex++;
                 		if(codeblockLineIndex == 1){// onCreate不需要log输出代码块信息！
-                			writer.write(insertLogCB(curMethoddt.getCodeblocks()[codeblockIndex].getID(), false, dotLocals));
+                			if(logDegree == 0) writer.write(insertLogCB(curMethoddt.getCodeblocks()[codeblockIndex].getID(), false, dotLocals));
+                			else if(!methodLogged) writer.write(insertLogM(curMethoddt.getID(), false, dotLocals));
+                			methodLogged = true;
                 		}
                 		if(codeblockLineIndex == curMethoddt.getCodeblocks()[codeblockIndex].getCommands().length){
                 			//将代码块ID及内容写入？
@@ -231,6 +236,15 @@ public class ClassData {
 				"invoke-static {v" + Integer.toString(regNum - 2) + ", v" + Integer.toString(regNum - 1) + "}, Landroid/util/Log;->v(Ljava/lang/String;Ljava/lang/String;)I\n\n";
 		}
 		return "\n    const-string v" + Integer.toString(regNum - 2) + ", \"code_block\"\n    " + "const-string v" + Integer.toString(regNum - 1) + ", \"" + cbID + "\"\n    " +
+			"invoke-static {v" + Integer.toString(regNum - 2) + ", v" + Integer.toString(regNum - 1) + "}, Landroid/util/Log;->v(Ljava/lang/String;Ljava/lang/String;)I\n\n";
+	}
+	
+	public String insertLogM(String methodID, boolean isfield, int regNum){
+		if(isfield){
+			return "\nconst-string v" + Integer.toString(regNum - 2) + ", \"method\"\n" + "const-string v" + Integer.toString(regNum - 1) + ", \"" + methodID + "\"\n" +
+				"invoke-static {v" + Integer.toString(regNum - 2) + ", v" + Integer.toString(regNum - 1) + "}, Landroid/util/Log;->v(Ljava/lang/String;Ljava/lang/String;)I\n\n";
+		}
+		return "\n    const-string v" + Integer.toString(regNum - 2) + ", \"method\"\n    " + "const-string v" + Integer.toString(regNum - 1) + ", \"" + methodID + "\"\n    " +
 			"invoke-static {v" + Integer.toString(regNum - 2) + ", v" + Integer.toString(regNum - 1) + "}, Landroid/util/Log;->v(Ljava/lang/String;Ljava/lang/String;)I\n\n";
 	}
 }
